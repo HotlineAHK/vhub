@@ -9,10 +9,10 @@ from headers import headers
 if not os.path.exists(".env"):
     with open(".env", 'w') as f:
         f.write("SUBSCRIPTION_URL=change_me\n")
-    print(f"Файл .env создан с настройками по умолчанию. Пожалуйста, измените файл .env.")
+    print(f"Файл .env не был найден и был создан автоматически с заглушкой вместо реального URL подписки. Пожалуйста, измените файл .env.")
     exit(1)
 else:
-    print(f"Файл .env найден.")
+    print(f"Файл .env был найден.")
 
 load_dotenv()
 
