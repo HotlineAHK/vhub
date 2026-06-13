@@ -21,8 +21,17 @@ load_dotenv()
 
 SUBSCRIPTION_URL = os.getenv("SUBSCRIPTION_URL")
 
-if SUBSCRIPTION_URL == None or SUBSCRIPTION_URL == "change_me":
-    print(f"Невозможно прочитать URL подписки или вы не заменили заглушку URL, пожалуйста, проверьте файл .env.")
+if SUBSCRIPTION_URL == None:
+    print(f"URL подписки не указан, пожалуйста, проверьте файл .env.")
+    exit(1)
+elif SUBSCRIPTION_URL == "change_me":
+    print(f"Вы не заменили заглушку URL, пожалуйста, проверьте файл .env.")
+    exit(1)
+elif SUBSCRIPTION_URL == "":
+    print(f"URL подписки не может быть пустым, пожалуйста, проверьте файл .env.")
+    exit(1)
+elif not SUBSCRIPTION_URL.startswith("http"):
+    print(f"URL подписки должен начинаться с http или https, пожалуйста, проверьте файл .env. Текущее значение: {SUBSCRIPTION_URL[:10] + len(SUBSCRIPTION_URL[10:]) * '*'}")
     exit(1)
 # endregion
 
