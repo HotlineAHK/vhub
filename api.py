@@ -31,7 +31,7 @@ elif SUBSCRIPTION_URL == "":
     print(f"URL подписки не может быть пустым, пожалуйста, проверьте файл .env.")
     exit(1)
 elif not SUBSCRIPTION_URL.startswith("http"):
-    print(f"URL подписки должен начинаться с http или https, пожалуйста, проверьте файл .env. Текущее значение: {SUBSCRIPTION_URL[:10] + len(SUBSCRIPTION_URL[10:]) * '*'}")
+    print(f"URL подписки должен начинаться с http или https, пожалуйста, проверьте файл .env. Текущее значение: {SUBSCRIPTION_URL[:5] + len(SUBSCRIPTION_URL[5:]) * '*'}")
     exit(1)
 # endregion
 
