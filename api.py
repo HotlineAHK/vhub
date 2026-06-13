@@ -28,8 +28,11 @@ if SUBSCRIPTION_URL == None or SUBSCRIPTION_URL == "change_me":
 
 # region error fallback config
 LAST_CONFIG_PATH = ".last_config.b64"
+ERROR_UUID = "00000000-0000-0000-0000-000000000000"
+ERROR_HOST = "0.0.0.0"
 
-def _get_error_fallback_enabled() -> bool:
+def _get_force_error_enabled() -> bool:
+    """При error_fallback: true принудительно вызывается ошибка для проверки fallback-механизма."""
     try:
         if os.path.exists("config.yaml"):
             with open("config.yaml", 'r') as f:
@@ -41,43 +44,50 @@ def _get_error_fallback_enabled() -> bool:
     return False
 
 def _build_fallback_response(saved_b64: str, error_msg: str) -> str:
-    """Decode saved BASE64, append 3 dummy servers: dash, error, dash, then re-encode."""
+    """
+    Decode saved BASE64, prepend 3 fake vless:// servers that show as errors in the client.
+    """
     try:
         decoded = base64.b64decode(saved_b64).decode("utf-8")
     except Exception:
-        # If saved data is corrupted, return raw saved data as-is
         return saved_b64
 
-    lines = decoded.strip().split("\n")
+    base = f"vless://{ERROR_UUID}@{ERROR_HOST}:0?encryption=none&type=tcp&security=none"
 
-    error_lines = [
-        "-",
-        f"# subscription error: {error_msg}",
-        "-",
+    error_servers = [
+        f"{base}#-",
+        f"{base}#⚠️ {error_msg}",
+        f"{base}#-",
     ]
 
-    new_config = "\n".join(lines + [""] + error_lines)
+    new_config = "\n".join(error_servers + decoded.strip().split("\n"))
     return base64.b64encode(new_config.encode("utf-8")).decode("utf-8")
 # endregion
 
 
 def get_servers() -> str:
-    error_fallback = _get_error_fallback_enabled()
-
+    force_error = _get_force_error_enabled()
+    if SUBSCRIPTION_URL == None or SUBSCRIPTION_URL == "change_me":
+        return _build_fallback_response("", "Не указан URL подписки в .env")
     try:
+        if force_error:
+            raise requests.exceptions.RequestException(
+                "Принудительная проверка fallback-механизма"
+            )
+
         response = requests.get(SUBSCRIPTION_URL, headers=headers)
 
         response.raise_for_status()
 
-        # Save the last successfully received BASE64 config
-        if error_fallback:
-            with open(LAST_CONFIG_PATH, 'w') as f:
-                f.write(response.text)
+        # Always save the last successfully received BASE64 config
+        with open(LAST_CONFIG_PATH, 'w') as f:
+            f.write(response.text)
 
         return response.text
 
     except requests.exceptions.RequestException as e:
-        if error_fallback and os.path.exists(LAST_CONFIG_PATH):
+        # Always try fallback if a saved config exists
+        if os.path.exists(LAST_CONFIG_PATH):
             try:
                 with open(LAST_CONFIG_PATH, 'r') as f:
                     saved_b64 = f.read()
