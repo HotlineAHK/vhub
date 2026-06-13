@@ -9,7 +9,7 @@ if not os.path.exists("config.yaml"):
     random_device = secrets.choice(device_list)
 
     with open("config.yaml", 'w') as f:
-        yaml.dump({"User-Agent": "v2raytun/android", "X-Device-Os": "Android", "X-Device-Locale": secrets.choice(["ru", "en"]), "X-Device-Model": str(random_device), "X-Ver-Os": str(9 + secrets.randbelow(7)), "Connection": "close", "X-Hwid": str(random_hwid)}, f)
+        yaml.dump({"User-Agent": "v2raytun/android", "X-Device-Os": "Android", "X-Device-Locale": secrets.choice(["ru", "en"]), "X-Device-Model": str(random_device), "X-Ver-Os": str(9 + secrets.randbelow(7)), "Connection": "close", "X-Hwid": str(random_hwid), "error_fallback": False}, f)
     print(f"Файл config.yaml не был найден и был создан автоматически. Пожалуйста, измените файл config.yaml.")
     exit(1)
 else:

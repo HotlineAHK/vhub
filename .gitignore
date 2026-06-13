@@ -208,3 +208,4 @@ __marimo__/
 
 # This project's specific ignores
 config.yaml
+.last_config.b64
